@@ -81,7 +81,13 @@ install_dependencies() {
     # Instalação do Node.js via NodeSource (se necessário)
     if ! command -v node >/dev/null 2>&1; then
         log_info "Node.js não encontrado. Instalando Node.js v${NODE_VERSION}..."
-        curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash - > /dev/null
+        apt-get install -y ca-certificates gnupg > /dev/null
+        mkdir -p /etc/apt/keyrings
+        # Remove a chave antiga se existir para evitar erro de gravação do gpg
+        rm -f /etc/apt/keyrings/nodesource.gpg
+        curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION}.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list > /dev/null
+        apt-get update -y > /dev/null
         apt-get install -y nodejs > /dev/null
     else
         log_success "Node.js já instalado ($(node -v))."
