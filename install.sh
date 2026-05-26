@@ -101,8 +101,49 @@ install_dependencies() {
     
     # Instalação do Java/Maven
     if ! command -v mvn >/dev/null 2>&1; then
-       log_info "Instalando Maven e OpenJDK..."
-       apt-get install -y openjdk-17-jdk maven > /dev/null
+        log_info "Instalando Maven..."
+        apt-get install -y maven > /dev/null
+    fi
+
+    # Garante que temos o Java 17+ instalado
+    if ! command -v java >/dev/null 2>&1 || ! java -version 2>&1 | grep -q "17"; then
+        log_info "Instalando OpenJDK 17..."
+        if ! apt-get install -y openjdk-17-jdk > /dev/null 2>&1; then
+            log_warn "openjdk-17-jdk não disponível via apt. Baixando JDK 17 diretamente da Adoptium..."
+            
+            # Detecta arquitetura do processador
+            ARCH=$(uname -m)
+            if [ "$ARCH" = "x86_64" ]; then
+                JDK_ARCH="x64"
+            elif [ "$ARCH" = "aarch64" ]; then
+                JDK_ARCH="aarch64"
+            elif [[ "$ARCH" == armv* ]]; then
+                JDK_ARCH="arm"
+            else
+                JDK_ARCH="x64"
+            fi
+            
+            JDK_URL="https://api.adoptium.net/v3/binary/latest/17/ga/linux/${JDK_ARCH}/jdk/hotspot/normal/eclipse?project=jdk"
+            if curl -L -s -o /tmp/jdk17.tar.gz "$JDK_URL"; then
+                mkdir -p /opt/jdk-17
+                tar -xzf /tmp/jdk17.tar.gz -C /opt/jdk-17 --strip-components=1
+                
+                # Configura alternativas do sistema para apontar para o JDK 17 baixado
+                update-alternatives --install /usr/bin/java java /opt/jdk-17/bin/java 1000 || true
+                update-alternatives --install /usr/bin/javac javac /opt/jdk-17/bin/javac 1000 || true
+                
+                # Garante que eles estão ativos como prioridade
+                update-alternatives --set java /opt/jdk-17/bin/java || true
+                update-alternatives --set javac /opt/jdk-17/bin/javac || true
+                
+                rm -f /tmp/jdk17.tar.gz
+                log_success "JDK 17 instalado com sucesso via Adoptium!"
+            else
+                log_error "Falha ao baixar o JDK 17 da Adoptium. Instale o Java 17 manualmente."
+            fi
+        else
+            log_success "OpenJDK 17 instalado com sucesso via apt!"
+        fi
     fi
 
     log_success "ROBERTINHO ESTÁ PRONTO PARA DESPERTAR"
