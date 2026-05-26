@@ -99,11 +99,11 @@ install_dependencies() {
         npm install -g pm2 > /dev/null
     fi
     
-    # Exemplo: Instalação do Java/Maven (descomente se usar backend Java)
-    # if ! command -v mvn >/dev/null 2>&1; then
-    #    log_info "Instalando Maven e OpenJDK..."
-    #    apt-get install -y openjdk-17-jdk maven > /dev/null
-    # fi
+    # Instalação do Java/Maven
+    if ! command -v mvn >/dev/null 2>&1; then
+       log_info "Instalando Maven e OpenJDK..."
+       apt-get install -y openjdk-17-jdk maven > /dev/null
+    fi
 
     log_success "Todas as dependências do sistema foram instaladas!"
 }
