@@ -10,7 +10,7 @@ Este projeto utiliza uma arquitetura de segurança onde este repositório atua a
 Para instalar o sistema completo em um novo ambiente Linux ou Raspberry Pi (Debian/Ubuntu/Raspbian), basta executar o comando abaixo no seu terminal:
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/robertozinho/main/install.sh)
+curl -fsSL -o install.sh https://raw.githubusercontent.com/3damatta/robertozinho/main/install.sh && sudo bash install.sh
 ```
 
 > [!IMPORTANT]
