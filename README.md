@@ -14,7 +14,7 @@ Este projeto utiliza uma arquitetura de segurança onde este repositório atua a
 Para instalar o sistema completo em um novo ambiente Linux ou Raspberry Pi (Debian/Ubuntu/Raspbian), basta executar o comando abaixo no seu terminal:
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/icerobot-installer/main/install.sh)
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/robertozinho/main/install.sh)
 ```
 
 > [!IMPORTANT]
@@ -35,7 +35,7 @@ sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/icerobot-insta
 Para buscar as últimas novidades do código proprietário e atualizar seu sistema sem perder dados, execute:
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/icerobot-installer/main/update.sh)
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/robertozinho/main/update.sh)
 ```
 
 > [!TIP]

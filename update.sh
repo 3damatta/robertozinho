@@ -10,7 +10,7 @@ set -e
 
 # --- Configurações Iniciais ---
 REPO_OWNER="3damatta"
-REPO_NAME="robertozinho"
+REPO_NAME="robertinho"
 INSTALL_DIR="/opt/icerobot"
 BACKUP_DIR="/opt/icerobot_backup_$(date +%Y%m%d_%H%M%S)"
 
