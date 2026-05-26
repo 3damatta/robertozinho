@@ -1,9 +1,5 @@
 # Ice Robot Bhar - Installer 🍸🤖
 
-[![Bash](https://img.shields.io/badge/Language-Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
-[![Linux](https://img.shields.io/badge/OS-Linux-FCC624?style=flat-square&logo=linux&logoColor=black)]()
-[![Status](https://img.shields.io/badge/Status-Active-success?style=flat-square)]()
-
 Bem-vindo ao repositório público de instalação do **Ice Robot Bhar**. 
 Este projeto utiliza uma arquitetura de segurança onde este repositório atua apenas como a **porta de entrada pública**, enquanto o código-fonte proprietário real reside em um repositório privado acessível apenas a operadores autorizados.
 
@@ -26,13 +22,20 @@ sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/robertozinho/m
 3. 🔐 Solicita seu GitHub Token de forma invisível.
 4. 📥 Clona o repositório privado para `/opt/icerobot` ocultando suas credenciais.
 5. 🏗️ Compila o Frontend/Backend automaticamente.
-6. 🚀 Configura o PM2 para iniciar o sistema automaticamente no boot do SO.
+6. 🖥️ Configura o **Kiosk Mode** (inicialização automática do Chromium em tela cheia no boot do SO, compatível com LXDE/X11 e Labwc/Wayland).
+7. 🚀 Configura o PM2 para iniciar o backend automaticamente no boot do SO.
 
 ---
 
 ## 🔄 Atualização Segura
 
-Para buscar as últimas novidades do código proprietário e atualizar seu sistema sem perder dados, execute:
+Para buscar as últimas novidades do código proprietário e atualizar seu sistema sem perder dados, você pode usar uma das seguintes formas:
+
+### 1. Pelo Painel Administrativo (Recomendado)
+Acesse a aba **System** na interface administrativa do painel, insira o seu GitHub PAT (Token) no campo correspondente e clique em buscar atualização. Se houver novidades, você poderá disparar a atualização diretamente pela UI. O token é mantido temporariamente em memória apenas durante o processo de atualização.
+
+### 2. Pelo Terminal do SO
+Execute o comando abaixo no terminal da máquina:
 
 ```bash
 sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/robertozinho/main/update.sh)
