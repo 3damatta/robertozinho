@@ -91,6 +91,10 @@ pull_updates() {
         false
     fi
 
+    # Atualiza submódulos
+    log_info "Atualizando submódulos do Git..."
+    git submodule update --init --recursive --quiet || true
+
     # Remove o token imediatamente após o pull para manter a segurança
     git remote set-url origin "https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
     

@@ -173,6 +173,12 @@ setup_repository() {
     # Entra no diretório
     cd "$INSTALL_DIR"
 
+    # Inicializa submodules
+    log_info "Inicializando submódulos do Git..."
+    if ! git submodule update --init --recursive; then
+        log_warn "Falha ao inicializar submódulos via Git. O projeto pode apresentar falhas de build."
+    fi
+
     # Remove o remetente origin com o token para que o PAT não fique salvo na pasta .git/config
     git remote remove origin
     # Adiciona novamente o origin genérico via SSH ou HTTPS limpo
