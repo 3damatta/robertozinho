@@ -117,7 +117,7 @@ get_github_token() {
     
     while true; do
         # read -s oculta a digitação no terminal
-        read -s -p "Cole seu GitHub Token (PAT): " GITHUB_TOKEN
+        read -s -p "Cole seu GitHub Token (PAT): " GITHUB_TOKEN </dev/tty
         echo ""
 
         if [ -z "$GITHUB_TOKEN" ]; then
@@ -153,7 +153,7 @@ setup_repository() {
 
     if [ -d "$INSTALL_DIR" ]; then
         log_warn "O diretório $INSTALL_DIR já existe."
-        read -p "Deseja apagá-lo e reinstalar do zero? (s/N): " choice
+        read -p "Deseja apagá-lo e reinstalar do zero? (s/N): " choice </dev/tty
         case "$choice" in 
           s|S ) rm -rf "$INSTALL_DIR"; log_info "Diretório antigo removido.";;
           * ) log_error "Instalação abortada para proteger os dados atuais.";;

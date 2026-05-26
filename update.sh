@@ -40,7 +40,7 @@ fi
 get_github_token() {
     echo ""
     log_info "Para atualizar, precisamos do GitHub Personal Access Token."
-    read -s -p "Cole seu GitHub Token (PAT): " GITHUB_TOKEN
+    read -s -p "Cole seu GitHub Token (PAT): " GITHUB_TOKEN </dev/tty
     echo ""
 
     if [ -z "$GITHUB_TOKEN" ]; then
