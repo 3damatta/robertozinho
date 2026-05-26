@@ -65,7 +65,7 @@ check_system() {
     fi
 
     # Verifica conexão com a internet
-    if ! ping -q -c 1 -W 1 google.com >/dev/null; then
+    if ! curl -s --connect-timeout 5 https://www.google.com >/dev/null; then
         log_error "Sem conexão com a internet. Verifique sua rede e tente novamente."
     fi
 }
