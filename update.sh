@@ -38,6 +38,10 @@ fi
 
 # --- Autenticação Segura ---
 get_github_token() {
+    if [ -n "$GITHUB_TOKEN" ]; then
+        log_info "Token do GitHub fornecido via ambiente."
+        return
+    fi
     echo ""
     log_info "Para atualizar, precisamos do GitHub Personal Access Token."
     read -s -p "Cole seu GitHub Token (PAT): " GITHUB_TOKEN </dev/tty
