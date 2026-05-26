@@ -181,6 +181,40 @@ setup_repository() {
     log_success "Código fonte clonado com sucesso e limpo de credenciais!"
 }
 
+# --- Setup do Kiosk Mode ---
+setup_kiosk_mode() {
+    log_info "Configurando o modo Kiosk do Chromium..."
+    
+    # Identifica o usuário não-root (geralmente 'pi' ou o usuário que rodou o sudo)
+    REAL_USER=${SUDO_USER:-$USER}
+    USER_HOME=$(eval echo ~$REAL_USER)
+    
+    # 1. Caso seja Wayland/Labwc (Debian Bookworm / RPi 4/5 recente)
+    LABWC_DIR="$USER_HOME/.config/labwc"
+    if [ -d "$USER_HOME/.config" ]; then
+        mkdir -p "$LABWC_DIR"
+        AUTOSTART_FILE="$LABWC_DIR/autostart"
+        # Se o arquivo não existir ou não tiver o chromium, adiciona
+        if ! grep -q "chromium-browser" "$AUTOSTART_FILE" 2>/dev/null; then
+            echo "chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080 &" >> "$AUTOSTART_FILE"
+            chown -R $REAL_USER:$REAL_USER "$LABWC_DIR"
+            log_success "Autostart do Kiosk configurado para Wayland (Labwc)."
+        fi
+    fi
+
+    # 2. Caso seja X11/LXDE (Debian Bullseye / RPi 3B+ antigo)
+    LXDE_DIR="$USER_HOME/.config/lxsession/LXDE-pi"
+    if [ -d "$USER_HOME/.config" ]; then
+        mkdir -p "$LXDE_DIR"
+        AUTOSTART_LXDE="$LXDE_DIR/autostart"
+        if ! grep -q "chromium-browser" "$AUTOSTART_LXDE" 2>/dev/null; then
+            echo "@chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080" >> "$AUTOSTART_LXDE"
+            chown -R $REAL_USER:$REAL_USER "$LXDE_DIR"
+            log_success "Autostart do Kiosk configurado para X11 (LXDE)."
+        fi
+    fi
+}
+
 # --- Setup do Ambiente ---
 build_and_start_project() {
     log_info "Configurando e compilando o projeto..."
@@ -189,24 +223,26 @@ build_and_start_project() {
     log_info "Instalando dependências do Frontend (Vue/Quasar)..."
     cd "$INSTALL_DIR/frontend" || true
     npm install > /dev/null 2>&1
-    # npm run build # (Descomente para buildar o frontend se aplicável)
+    
+    log_info "Gerando build de produção do Frontend..."
+    npm run build > /dev/null 2>&1
 
-    # 2. Configurar Backend (Exemplo genérico)
-    # log_info "Compilando backend..."
-    # cd "$INSTALL_DIR/backend"
-    # mvn clean install -DskipTests > /dev/null 2>&1
+    # 2. Configurar Backend (Maven)
+    log_info "Compilando backend Java com Maven (gerando JAR)..."
+    cd "$INSTALL_DIR"
+    mvn clean install -DskipTests > /dev/null 2>&1
 
     # 3. Inicializando com PM2
     log_info "Configurando PM2 Start Script..."
     cd "$INSTALL_DIR"
     
-    # Cria o ecossistema do PM2 (ajuste os caminhos do seu backend/frontend)
+    # Cria o ecossistema do PM2 rodando o jar compilado
     cat > ecosystem.config.js << EOL
 module.exports = {
   apps : [{
     name: "icerobot-app",
-    script: "npm",
-    args: "run start",
+    script: "java",
+    args: "-jar backend/target/server.jar",
     cwd: "$INSTALL_DIR",
     watch: false,
     env: {
@@ -217,9 +253,11 @@ module.exports = {
 EOL
 
     # Inicia e salva o PM2 para ligar junto com o Raspberry Pi (Linux boot)
-    # pm2 start ecosystem.config.js
-    # pm2 save
-    # pm2 startup
+    pm2 start ecosystem.config.js
+    pm2 save
+    
+    # Executa a configuração de startup do PM2 de forma automática para o root
+    pm2 startup systemd -u root --hp /root > /dev/null 2>&1 || true
 
     log_success "Ambiente configurado com sucesso!"
 }
@@ -232,6 +270,7 @@ main() {
     get_github_token
     setup_repository
     build_and_start_project
+    setup_kiosk_mode
 
     echo ""
     echo -e "${GREEN}${BOLD}=================================================================${NC}"

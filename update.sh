@@ -95,15 +95,18 @@ pull_updates() {
 
 # --- Rebuild e Restart ---
 rebuild_project() {
-    log_info "Reconstruindo o projeto..."
+    log_info "Reconstruindo o Frontend..."
+    cd "$INSTALL_DIR/frontend"
+    npm install > /dev/null 2>&1
+    npm run build > /dev/null 2>&1
     
-    # Instala/Atualiza dependências se o package.json mudou
-    # cd "$INSTALL_DIR/frontend"
-    # npm install
-    # npm run build
+    log_info "Reconstruindo o Backend..."
+    cd "$INSTALL_DIR"
+    mvn clean install -DskipTests > /dev/null 2>&1
     
-    log_info "Reiniciando os serviços..."
-    # pm2 restart icerobot-app
+    log_info "Reiniciando os serviços no PM2..."
+    pm2 restart icerobot-app || pm2 start ecosystem.config.js
+    pm2 save
 }
 
 # --- Main ---
