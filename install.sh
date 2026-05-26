@@ -76,7 +76,7 @@ install_dependencies() {
     apt-get update -y > /dev/null
 
     log_info "Instalando dependências base (curl, git, wget, build-essential)..."
-    apt-get install -y curl git wget build-essential jq software-properties-common > /dev/null
+    apt-get install -y curl git wget build-essential jq > /dev/null
 
     # Instalação do Node.js via NodeSource (se necessário)
     if ! command -v node >/dev/null 2>&1; then
