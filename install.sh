@@ -43,14 +43,14 @@ print_banner() {
     echo " |___\___\___||___\___/___/_.__/\___/\__| |___/_||_\__,_|_|    "
     echo "                                                               "
     echo -e "${NC}================================================================="
-    echo -e " Instalador Profissional - Ice Robot Bhar v1.0"
+    echo -e " Instalador Automático - Ice Robot Bhar v1.4.20"
     echo -e "================================================================="
     echo ""
 }
 
 # --- Verificações do Sistema ---
 check_system() {
-    log_info "Verificando o sistema..."
+    log_info "Verificando o sistema para ver se tudo esta pronto pro ROBERTINHO"
 
     # Verifica se é root
     if [ "$EUID" -ne 0 ]; then
@@ -59,7 +59,7 @@ check_system() {
 
     # Verifica a arquitetura
     ARCH=$(uname -m)
-    log_info "Arquitetura detectada: $ARCH"
+    log_info "Arquitetura do ROBERTINHO detectada: $ARCH"
     if [[ "$ARCH" != "x86_64" && "$ARCH" != "aarch64" && "$ARCH" != "armv7l" ]]; then
         log_warn "Arquitetura $ARCH pode não ser totalmente suportada. Tentando prosseguir..."
     fi
@@ -105,7 +105,7 @@ install_dependencies() {
        apt-get install -y openjdk-17-jdk maven > /dev/null
     fi
 
-    log_success "Todas as dependências do sistema foram instaladas!"
+    log_success "ROBERTINHO ESTÁ PRONTO PARA DESPERTAR"
 }
 
 # --- Autenticação Segura ---
