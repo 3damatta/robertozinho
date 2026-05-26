@@ -14,7 +14,7 @@ set -o pipefail # Garante que erros em pipes sejam detectados
 
 # --- Configurações Iniciais ---
 REPO_OWNER="3damatta"
-REPO_NAME="robertinho"
+REPO_NAME="robertozinho"
 INSTALL_DIR="/opt/icerobot"
 NODE_VERSION="20" # Versão do Node.js a ser instalada
 
