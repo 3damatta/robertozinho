@@ -72,7 +72,7 @@ check_system() {
 
 # --- Instalação de Dependências Base ---
 install_dependencies() {
-    log_info "Atualizando a lista de pacotes apt..."
+    log_info "Atualizando a lista de pacotes apt do ROBERTINHO..."
     apt-get update -y > /dev/null
 
     log_info "Instalando dependências base (curl, git, wget, build-essential)..."
@@ -112,6 +112,7 @@ install_dependencies() {
 get_github_token() {
     echo ""
     log_info "Este projeto está em um repositório privado."
+    log_info "PARA LIBERAR TODOS OS PODERES DO ROBERTINHO"
     log_info "Você precisará de um GitHub Personal Access Token (PAT) com acesso de leitura (repo)."
     echo ""
     
