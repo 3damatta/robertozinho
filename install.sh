@@ -366,11 +366,12 @@ module.exports = {
   apps : [{
     name: "icerobot-app",
     script: "java",
-    args: "-jar backend/target/server.jar",
+    args: "-Dspring.profiles.active=prod -jar backend/target/server.jar",
     cwd: "$INSTALL_DIR",
     watch: false,
     env: {
       NODE_ENV: "production",
+      SPRING_PROFILES_ACTIVE: "prod"
     }
   }]
 }
