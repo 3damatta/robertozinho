@@ -1,6 +1,23 @@
-echo "=== Ambiente e Sessão ==="
-echo "XDG: $XDG_CURRENT_DESKTOP | SESSION: $DESKTOP_SESSION"
-echo "=== Pastas de Configuração ==="
-ls -F ~/.config | grep -E "wayfire|labwc|pcmanfm|lx|autostart|openbox"
-echo "=== Conteúdo do Kiosk ==="
-cat /opt/icerobot/kiosk.sh
+# 1. Garante que a pasta local do Labwc existe
+mkdir -p ~/.config/labwc
+
+# 2. Copia o autostart global do sistema para a sua pasta pessoal
+if [ -f /etc/xdg/labwc/autostart ]; then
+    cp /etc/xdg/labwc/autostart ~/.config/labwc/autostart
+else
+    touch ~/.config/labwc/autostart
+fi
+
+# 3. Comenta e desativa a barra de tarefas (panel) e o fundo de tela (pcmanfm / wallpaper)
+sed -i 's/^\(wf-panel-pi\|waybar\|lxpanel\|pcmanfm-qt --desktop\|pcmanfm --desktop\|swaybg\|wpaperd\)/# \0/g' ~/.config/labwc/autostart
+sed -i 's/^exec \(wf-panel-pi\|waybar\|lxpanel\|pcmanfm-qt --desktop\|pcmanfm --desktop\|swaybg\|wpaperd\)/# exec \1/g' ~/.config/labwc/autostart
+
+# 4. Garante que o kiosk.sh seja inicializado aqui
+if ! grep -q "kiosk.sh" ~/.config/labwc/autostart; then
+    echo "/opt/icerobot/kiosk.sh &" >> ~/.config/labwc/autostart
+fi
+
+echo "=========================================="
+echo "Configuração do Labwc aplicada!"
+echo "Reinicie agora com: sudo reboot"
+echo "=========================================="
