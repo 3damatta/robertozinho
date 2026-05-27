@@ -106,7 +106,7 @@ rebuild_project() {
     log_info "Reconstruindo o Frontend..."
     cd "$INSTALL_DIR/frontend"
     npm install > /dev/null 2>&1
-    npm run build > /dev/null 2>&1
+    NODE_OPTIONS="--max-old-space-size=1024" npm run build > /dev/null 2>&1
     
     log_info "Reconstruindo o Backend..."
     cd "$INSTALL_DIR"

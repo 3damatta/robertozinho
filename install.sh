@@ -288,7 +288,7 @@ build_and_start_project() {
     npm install > /dev/null 2>&1
     
     log_info "Gerando build de produção do Frontend..."
-    npm run build > /dev/null 2>&1
+    NODE_OPTIONS="--max-old-space-size=1024" npm run build > /dev/null 2>&1
 
     # 2. Configurar Backend (Maven)
     log_info "Compilando backend Java com Maven (gerando JAR)..."
