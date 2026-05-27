@@ -1,3 +1,7 @@
+# 1. Devolve a propriedade da pasta .config inteira para o seu usuário comum (pi)
+sudo chown -R pi:pi ~/.config
+
+# 2. Cria o script do kiosk com delay seguro (como root, pois fica na pasta do sistema /opt)
 sudo bash -c 'cat > /opt/icerobot/kiosk.sh << EOL
 #!/bin/bash
 sleep 7
@@ -5,7 +9,27 @@ export DISPLAY=:0
 chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080 &
 EOL'
 sudo chmod +x /opt/icerobot/kiosk.sh
-# 2. Configura no autostart do Wayfire (se seu RPi usar Bookworm/Wayland)
+
+# 3. Cria as pastas de autostart agora com as permissões corretas
+mkdir -p ~/.config/lxsession/LXDE-pi
+mkdir -p ~/.config/lxsession/LXDE
+mkdir -p ~/.config/autostart
+
+# 4. Escreve os arquivos de inicialização do Kiosk
+echo "@/opt/icerobot/kiosk.sh" > ~/.config/lxsession/LXDE-pi/autostart
+echo "@/opt/icerobot/kiosk.sh" > ~/.config/lxsession/LXDE/autostart
+
+cat > ~/.config/autostart/kiosk.desktop << EOL
+[Desktop Entry]
+Type=Application
+Name=Ice Robot Kiosk
+Exec=/opt/icerobot/kiosk.sh
+Terminal=false
+X-GNOME-Autostart-enabled=true
+EOL
+chmod +x ~/.config/autostart/kiosk.desktop
+
+# 5. Configura no autostart do Wayfire (se usado no RPi 4/5 Bookworm)
 WAYFIRE_FILE=~/.config/wayfire.ini
 if [ -f "$WAYFIRE_FILE" ]; then
     if ! grep -q "icerobot_kiosk" "$WAYFIRE_FILE"; then
@@ -16,22 +40,3 @@ if [ -f "$WAYFIRE_FILE" ]; then
         fi
     fi
 fi
-# 3. Configura no autostart do LXDE (se usar RPi 3B+ antigo)
-for dir in "LXDE-pi" "LXDE"; do
-    LXDE_DIR=~/.config/lxsession/$dir
-    mkdir -p "$LXDE_DIR"
-    if ! grep -q "kiosk.sh" "$LXDE_DIR/autostart" 2>/dev/null; then
-        echo "@/opt/icerobot/kiosk.sh" >> "$LXDE_DIR/autostart"
-    fi
-done
-# 4. Configura no Autostart Universal
-mkdir -p ~/.config/autostart
-cat > ~/.config/autostart/kiosk.desktop << EOL
-[Desktop Entry]
-Type=Application
-Name=Ice Robot Kiosk
-Exec=/opt/icerobot/kiosk.sh
-Terminal=false
-X-GNOME-Autostart-enabled=true
-EOL
-chmod +x ~/.config/autostart/kiosk.desktop
