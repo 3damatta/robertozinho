@@ -245,7 +245,7 @@ setup_kiosk_mode() {
     cat > "$KIOSK_SCRIPT" << EOL
 #!/bin/bash
 # Aguarda o ambiente gráfico e rede estarem totalmente prontos
-sleep 7
+sleep 1
 
 # Detecta o comando correto do navegador
 if command -v chromium-browser >/dev/null 2>&1; then
