@@ -261,6 +261,21 @@ setup_kiosk_mode() {
             log_success "Autostart do Kiosk configurado para X11 (LXDE)."
         fi
     fi
+
+    # 3. Método Universal XDG Autostart (Desktop Entry para qualquer gerenciador)
+    XDG_AUTOSTART_DIR="$USER_HOME/.config/autostart"
+    if [ -d "$USER_HOME/.config" ]; then
+        mkdir -p "$XDG_AUTOSTART_DIR"
+        cat > "$XDG_AUTOSTART_DIR/kiosk.desktop" << EOL
+[Desktop Entry]
+Type=Application
+Name=Ice Robot Kiosk
+Exec=chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080
+X-GNOME-Autostart-enabled=true
+EOL
+        chown -R $REAL_USER:$REAL_USER "$XDG_AUTOSTART_DIR"
+        log_success "Autostart do Kiosk configurado via XDG Desktop Entry."
+    fi
 }
 
 # --- Setup do Ambiente ---
