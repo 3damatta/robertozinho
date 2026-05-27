@@ -282,18 +282,36 @@ EOL
 build_and_start_project() {
     log_info "Configurando e compilando o projeto..."
 
+    # Garante que o arquivo de swap local criado esteja ativo (pode ter desativado ao reiniciar)
+    if [ -f "/swapfile" ] && ! swapon --show | grep -q "/swapfile"; then
+        log_info "Reativando arquivo de swap /swapfile para compilação..."
+        swapon /swapfile || true
+    fi
+
     # 1. Configurar Frontend
     log_info "Instalando dependências do Frontend (Vue/Quasar)..."
     cd "$INSTALL_DIR/frontend" || true
-    npm install > /dev/null 2>&1
+    if ! npm install > /tmp/frontend_install.log 2>&1; then
+        echo -e "${RED}[ERROR] Falha ao instalar dependências do Frontend. Últimas linhas do log:${NC}"
+        tail -n 30 /tmp/frontend_install.log
+        exit 1
+    fi
     
     log_info "Gerando build de produção do Frontend..."
-    NODE_OPTIONS="--max-old-space-size=1024" npm run build > /dev/null 2>&1
+    if ! NODE_OPTIONS="--max-old-space-size=1024" npm run build > /tmp/frontend_build.log 2>&1; then
+        echo -e "${RED}[ERROR] Falha na compilação do Frontend. Últimas linhas do log:${NC}"
+        tail -n 30 /tmp/frontend_build.log
+        exit 1
+    fi
 
     # 2. Configurar Backend (Maven)
     log_info "Compilando backend Java com Maven (gerando JAR)..."
     cd "$INSTALL_DIR"
-    mvn clean install -DskipTests > /dev/null 2>&1
+    if ! mvn clean install -DskipTests > /tmp/backend_build.log 2>&1; then
+        echo -e "${RED}[ERROR] Falha na compilação do Backend. Últimas linhas do log:${NC}"
+        tail -n 30 /tmp/backend_build.log
+        exit 1
+    fi
 
     # 3. Inicializando com PM2
     log_info "Configurando PM2 Start Script..."
