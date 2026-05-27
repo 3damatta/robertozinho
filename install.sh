@@ -405,7 +405,7 @@ main() {
     echo -e "O sistema foi instalado em: ${CYAN}$INSTALL_DIR${NC}"
     echo -e "O gerenciador PM2 está cuidando dos processos em background."
     echo ""
-    echo -e "Acesse o sistema pelo navegador: ${BLUE}http://$(hostname -I | awk '{print $1}'):8080${NC} (Ajuste a porta se necessário)"
+    echo -e "Acesse o sistema pelo navegador: ${BLUE}http://\$(hostname -I | awk '{print \$1}')${NC}"
     echo ""
 }
 
