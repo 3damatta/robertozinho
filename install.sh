@@ -350,7 +350,7 @@ build_and_start_project() {
     # 2. Configurar Backend (Maven)
     log_info "Compilando backend Java com Maven (gerando JAR)..."
     cd "$INSTALL_DIR"
-    if ! mvn clean install -DskipTests > /tmp/backend_build.log 2>&1; then
+    if ! mvn clean install -Pprod -DskipTests > /tmp/backend_build.log 2>&1; then
         echo -e "${RED}[ERROR] Falha na compilação do Backend. Últimas linhas do log:${NC}"
         tail -n 30 /tmp/backend_build.log
         exit 1

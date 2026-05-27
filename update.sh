@@ -110,7 +110,7 @@ rebuild_project() {
     
     log_info "Reconstruindo o Backend..."
     cd "$INSTALL_DIR"
-    mvn clean install -DskipTests >> "$INSTALL_DIR/update.log" 2>&1
+    mvn clean install -Pprod -DskipTests >> "$INSTALL_DIR/update.log" 2>&1
     
     log_info "Reiniciando os serviços no PM2..."
     pm2 restart icerobot-app || pm2 start ecosystem.config.js >> "$INSTALL_DIR/update.log" 2>&1
