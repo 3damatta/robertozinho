@@ -1,23 +1,25 @@
-# 1. Garante que a pasta local do Labwc existe
-mkdir -p ~/.config/labwc
+# 1. Sobrescreve as configurações do PM2 para forçar o perfil de produção (prod)
+cat << 'EOF' | sudo tee /opt/icerobot/ecosystem.config.js
+module.exports = {
+  apps : [{
+    name: "icerobot-app",
+    script: "java",
+    args: "-Dspring.profiles.active=prod -jar backend/target/server.jar",
+    cwd: "/opt/icerobot",
+    watch: false,
+    env: {
+      NODE_ENV: "production",
+      SPRING_PROFILES_ACTIVE: "prod"
+    }
+  }]
+}
+EOF
 
-# 2. Copia o autostart global do sistema para a sua pasta pessoal
-if [ -f /etc/xdg/labwc/autostart ]; then
-    cp /etc/xdg/labwc/autostart ~/.config/labwc/autostart
-else
-    touch ~/.config/labwc/autostart
-fi
+# 2. Deleta o processo antigo do gerenciador para limpar o cache dele
+sudo pm2 delete icerobot-app
 
-# 3. Comenta e desativa a barra de tarefas (panel) e o fundo de tela (pcmanfm / wallpaper)
-sed -i 's/^\(wf-panel-pi\|waybar\|lxpanel\|pcmanfm-qt --desktop\|pcmanfm --desktop\|swaybg\|wpaperd\)/# \0/g' ~/.config/labwc/autostart
-sed -i 's/^exec \(wf-panel-pi\|waybar\|lxpanel\|pcmanfm-qt --desktop\|pcmanfm --desktop\|swaybg\|wpaperd\)/# exec \1/g' ~/.config/labwc/autostart
+# 3. Inicia o aplicativo novamente usando a nova configuração
+sudo pm2 start /opt/icerobot/ecosystem.config.js
 
-# 4. Garante que o kiosk.sh seja inicializado aqui
-if ! grep -q "kiosk.sh" ~/.config/labwc/autostart; then
-    echo "/opt/icerobot/kiosk.sh &" >> ~/.config/labwc/autostart
-fi
-
-echo "=========================================="
-echo "Configuração do Labwc aplicada!"
-echo "Reinicie agora com: sudo reboot"
-echo "=========================================="
+# 4. Salva as configurações para ligar junto com o Raspberry Pi
+sudo pm2 save
