@@ -236,33 +236,63 @@ setup_kiosk_mode() {
     # Identifica o usuário não-root (geralmente 'pi' ou o usuário que rodou o sudo)
     REAL_USER=${SUDO_USER:-$USER}
     USER_HOME=$(eval echo ~$REAL_USER)
+
+    # Cria a pasta de instalação caso não exista
+    mkdir -p "$INSTALL_DIR"
+
+    # Cria o script de inicialização do Kiosk com delay para evitar race conditions
+    KIOSK_SCRIPT="$INSTALL_DIR/kiosk.sh"
+    cat > "$KIOSK_SCRIPT" << EOL
+#!/bin/bash
+# Aguarda o ambiente gráfico e rede estarem totalmente prontos
+sleep 7
+export DISPLAY=:0
+chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080 &
+EOL
+    chmod +x "$KIOSK_SCRIPT"
+    chown $REAL_USER:$REAL_USER "$KIOSK_SCRIPT"
+    log_info "Script de Kiosk (/opt/icerobot/kiosk.sh) criado com sucesso."
     
-    # 1. Caso seja Wayland/Labwc (Debian Bookworm / RPi 4/5 recente)
+    # 1. Caso seja Wayland/Wayfire (Debian Bookworm padrão no RPi 4/5)
+    WAYFIRE_FILE="$USER_HOME/.config/wayfire.ini"
+    if [ -f "$WAYFIRE_FILE" ]; then
+        if ! grep -q "icerobot_kiosk" "$WAYFIRE_FILE" 2>/dev/null; then
+            if grep -q "\[autostart\]" "$WAYFIRE_FILE" 2>/dev/null; then
+                sed -i '/\[autostart\]/a icerobot_kiosk = /opt/icerobot/kiosk.sh' "$WAYFIRE_FILE"
+            else
+                echo -e "\n[autostart]\nicerobot_kiosk = /opt/icerobot/kiosk.sh" >> "$WAYFIRE_FILE"
+            fi
+            log_success "Autostart do Kiosk configurado para Wayland (Wayfire)."
+        fi
+    fi
+
+    # 2. Caso seja Wayland/Labwc (Debian Bookworm alternativo)
     LABWC_DIR="$USER_HOME/.config/labwc"
     if [ -d "$USER_HOME/.config" ]; then
         mkdir -p "$LABWC_DIR"
         AUTOSTART_FILE="$LABWC_DIR/autostart"
-        # Se o arquivo não existir ou não tiver o chromium, adiciona
-        if ! grep -q "chromium-browser" "$AUTOSTART_FILE" 2>/dev/null; then
-            echo "chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080 &" >> "$AUTOSTART_FILE"
+        if ! grep -q "kiosk.sh" "$AUTOSTART_FILE" 2>/dev/null; then
+            echo "/opt/icerobot/kiosk.sh &" >> "$AUTOSTART_FILE"
             chown -R $REAL_USER:$REAL_USER "$LABWC_DIR"
             log_success "Autostart do Kiosk configurado para Wayland (Labwc)."
         fi
     fi
 
-    # 2. Caso seja X11/LXDE (Debian Bullseye / RPi 3B+ antigo)
-    LXDE_DIR="$USER_HOME/.config/lxsession/LXDE-pi"
-    if [ -d "$USER_HOME/.config" ]; then
-        mkdir -p "$LXDE_DIR"
-        AUTOSTART_LXDE="$LXDE_DIR/autostart"
-        if ! grep -q "chromium-browser" "$AUTOSTART_LXDE" 2>/dev/null; then
-            echo "@chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080" >> "$AUTOSTART_LXDE"
-            chown -R $REAL_USER:$REAL_USER "$LXDE_DIR"
-            log_success "Autostart do Kiosk configurado para X11 (LXDE)."
+    # 3. Caso seja X11/LXDE (Debian Bullseye/Buster no RPi 3B+ ou x86_64)
+    for dir in "LXDE-pi" "LXDE"; do
+        LXDE_DIR="$USER_HOME/.config/lxsession/$dir"
+        if [ -d "$USER_HOME/.config" ]; then
+            mkdir -p "$LXDE_DIR"
+            AUTOSTART_LXDE="$LXDE_DIR/autostart"
+            if ! grep -q "kiosk.sh" "$AUTOSTART_LXDE" 2>/dev/null; then
+                echo "@/opt/icerobot/kiosk.sh" >> "$AUTOSTART_LXDE"
+                chown -R $REAL_USER:$REAL_USER "$LXDE_DIR"
+                log_success "Autostart do Kiosk configurado para X11 ($dir)."
+            fi
         fi
-    fi
+    done
 
-    # 3. Método Universal XDG Autostart (Desktop Entry para qualquer gerenciador)
+    # 4. Método Universal XDG Autostart (.desktop)
     XDG_AUTOSTART_DIR="$USER_HOME/.config/autostart"
     if [ -d "$USER_HOME/.config" ]; then
         mkdir -p "$XDG_AUTOSTART_DIR"
@@ -270,9 +300,11 @@ setup_kiosk_mode() {
 [Desktop Entry]
 Type=Application
 Name=Ice Robot Kiosk
-Exec=chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080
+Exec=/opt/icerobot/kiosk.sh
+Terminal=false
 X-GNOME-Autostart-enabled=true
 EOL
+        chmod +x "$XDG_AUTOSTART_DIR/kiosk.desktop"
         chown -R $REAL_USER:$REAL_USER "$XDG_AUTOSTART_DIR"
         log_success "Autostart do Kiosk configurado via XDG Desktop Entry."
     fi
