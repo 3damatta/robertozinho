@@ -246,8 +246,19 @@ setup_kiosk_mode() {
 #!/bin/bash
 # Aguarda o ambiente gráfico e rede estarem totalmente prontos
 sleep 7
-export DISPLAY=:0
-chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080 &
+
+# Detecta o comando correto do navegador
+if command -v chromium-browser >/dev/null 2>&1; then
+    CHROME_BIN="chromium-browser"
+elif command -v chromium >/dev/null 2>&1; then
+    CHROME_BIN="chromium"
+elif command -v google-chrome >/dev/null 2>&1; then
+    CHROME_BIN="google-chrome"
+else
+    CHROME_BIN="chromium-browser"
+fi
+
+\$CHROME_BIN --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080 &
 EOL
     chmod +x "$KIOSK_SCRIPT"
     chown $REAL_USER:$REAL_USER "$KIOSK_SCRIPT"
