@@ -1,0 +1,21 @@
+# 1. Detecta o arquivo de inicialização correto do sistema
+if [ -f /boot/firmware/cmdline.txt ]; then
+    CMDLINE="/boot/firmware/cmdline.txt"
+    CONFIG="/boot/firmware/config.txt"
+else
+    CMDLINE="/boot/cmdline.txt"
+    CONFIG="/boot/config.txt"
+fi
+# 2. Faz backup dos arquivos originais por segurança
+sudo cp "$CMDLINE" "${CMDLINE}.bak"
+sudo cp "$CONFIG" "${CONFIG}.bak"
+# 3. Adiciona parâmetros para silenciar o boot no cmdline.txt
+CONTENT=$(cat "$CMDLINE" | sed -e 's/ quiet//g' -e 's/ loglevel=[0-9]//g' -e 's/ logo.nologo//g' -e 's/ vt.global_cursor_default=[0-9]//g' -e 's/ consoleblank=[0-9]//g')
+echo "$CONTENT quiet loglevel=3 logo.nologo vt.global_cursor_default=0 consoleblank=1" | sudo tee "$CMDLINE" > /dev/null
+# 4. Desativa a tela colorida de teste (rainbow screen) no config.txt
+if ! grep -q "disable_splash=1" "$CONFIG"; then
+    echo "disable_splash=1" | sudo tee -a "$CONFIG" > /dev/null
+fi
+# 5. Remove mensagens adicionais de boot do console
+sudo systemctl disable getty@tty1.service --quiet || true
+echo "Configuração concluída com sucesso! Pode reiniciar."
