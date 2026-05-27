@@ -1,22 +1,49 @@
-# 1. Ajusta o delay do kiosk para abrir instantaneamente (0.1 segundos)
-sudo sed -i 's/sleep [0-9]/sleep 0.1/g' /opt/icerobot/kiosk.sh
-
-# 2. Detecta o arquivo de boot correto
-if [ -f /boot/firmware/cmdline.txt ]; then
-    CMDLINE="/boot/firmware/cmdline.txt"
-else
-    CMDLINE="/boot/cmdline.txt"
+# ==========================================
+# 1. DESATIVAR SPLASH DA PLACA (EEPROM FIRMWARE)
+# ==========================================
+echo "Desativando splash do firmware da placa..."
+sudo rpi-eeprom-config --out current.conf 2>/dev/null || true
+if [ -f current.conf ]; then
+    sudo sed -i 's/DISABLE_SPLASH=0/DISABLE_SPLASH=1/g' current.conf
+    if ! grep -q "DISABLE_SPLASH" current.conf; then
+        echo "DISABLE_SPLASH=1" >> current.conf
+    fi
+    sudo rpi-eeprom-config --in current.conf > /dev/null 2>&1 || true
+    rm -f current.conf
 fi
 
-# 3. Restaura o backup anterior para garantir um estado limpo
-if [ -f "${CMDLINE}.bak" ]; then
-    sudo cp "${CMDLINE}.bak" "$CMDLINE"
+# ==========================================
+# 2. ATUALIZAR IMAGEM DE BOOT (INITRAMFS)
+# ==========================================
+echo "Aplicando tela preta de boot no initramfs..."
+sudo update-initramfs -u
+
+# ==========================================
+# 3. OCULTAR WALLPAPER E BARRA DE TAREFAS
+# ==========================================
+REAL_USER=${SUDO_USER:-$USER}
+USER_HOME=$(eval echo ~$REAL_USER)
+
+# Caso seu Raspberry esteja usando WAYFIRE (Padrão RPi 4):
+WAYFIRE_CONF="$USER_HOME/.config/wayfire.ini"
+if [ -f "$WAYFIRE_CONF" ]; then
+    echo "Configurando Wayfire para tela preta..."
+    cp "$WAYFIRE_CONF" "${WAYFIRE_CONF}.bak"
+    # Remove a imagem de fundo (deixa preto)
+    sed -i 's/^background = .*/background = /g' "$WAYFIRE_CONF"
+    # Remove o plugin do painel/barra de tarefas da inicialização
+    sed -i 's/\bpanel\b//g' "$WAYFIRE_CONF"
 fi
 
-# 4. Remove quiet, splash e configurações antigas
-CONTENT=$(cat "$CMDLINE" | sed -e 's/ quiet//g' -e 's/ splash//g' -e 's/ loglevel=[0-9]//g' -e 's/ logo.nologo//g' -e 's/ vt.global_cursor_default=[0-9]//g' -e 's/ consoleblank=[0-9]//g' -e 's/ plymouth.enable=[0-9]//g')
+# Caso seu Raspberry esteja usando LABWC (Padrão RPi 5):
+LABWC_AUTOSTART="$USER_HOME/.config/labwc/autostart"
+if [ -f "$LABWC_AUTOSTART" ]; then
+    echo "Configurando Labwc para tela preta..."
+    cp "$LABWC_AUTOSTART" "${LABWC_AUTOSTART}.bak"
+    # Desativa barra de tarefas e gerenciadores de fundo de tela
+    sed -i 's/^\(exec \)\?\(wf-panel-pi\|waybar\|pcmanfm-qt --desktop\|pcmanfm --desktop\|swaybg\|wpaperd\)/# \0/g' "$LABWC_AUTOSTART"
+fi
 
-# 5. Aplica a inicialização 100% silenciosa com tela preta e desativa o Plymouth logo
-echo "$CONTENT quiet loglevel=3 logo.nologo vt.global_cursor_default=0 consoleblank=1 plymouth.enable=0" | sudo tee "$CMDLINE" > /dev/null
-
-echo "Pronto! Pode reiniciar agora com 'sudo reboot' para testar."
+echo "=========================================="
+echo "Configurações aplicadas! Reinicie com: sudo reboot"
+echo "=========================================="
