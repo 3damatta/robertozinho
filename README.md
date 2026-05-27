@@ -10,7 +10,7 @@ Este projeto utiliza uma arquitetura de segurança onde este repositório atua a
 Para instalar o sistema completo em um novo ambiente Linux ou Raspberry Pi (Debian/Ubuntu/Raspbian), basta executar o comando abaixo no seu terminal:
 
 ```bash
-curl -fsSL -o install.sh https://raw.githubusercontent.com/3damatta/robertozinho/main/install.sh && sudo bash install.sh
+curl -fsSL -H "Cache-Control: no-cache" -o install.sh https://raw.githubusercontent.com/3damatta/robertozinho/main/install.sh && sudo bash install.sh
 ```
 
 > [!IMPORTANT]
@@ -38,7 +38,7 @@ Acesse a aba **System** na interface administrativa do painel, insira o seu GitH
 Execute o comando abaixo no terminal da máquina:
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/3damatta/robertozinho/main/update.sh)
+curl -fsSL -H "Cache-Control: no-cache" -o update.sh https://raw.githubusercontent.com/3damatta/robertozinho/main/update.sh && sudo bash update.sh
 ```
 
 > [!TIP]
