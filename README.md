@@ -3,51 +3,7 @@
 Bem-vindo ao repositório público de instalação do **Ice Robot Bhar**. 
 Este projeto utiliza uma arquitetura de segurança onde este repositório atua apenas como a **porta de entrada pública**, enquanto o código-fonte proprietário real reside em um repositório privado acessível apenas a operadores autorizados.
 
-# 1. Cria o script do kiosk com delay seguro
-sudo bash -c 'cat > /opt/icerobot/kiosk.sh << EOL
-#!/bin/bash
-sleep 7
-export DISPLAY=:0
-chromium-browser --kiosk --noerrdialogs --disable-infobars --no-first-run http://localhost:8080 &
-EOL'
-sudo chmod +x /opt/icerobot/kiosk.sh
 
-# 2. Configura no autostart do Wayfire (se seu RPi usar Bookworm/Wayland)
-WAYFIRE_FILE=~/.config/wayfire.ini
-if [ -f "$WAYFIRE_FILE" ]; then
-    if ! grep -q "icerobot_kiosk" "$WAYFIRE_FILE"; then
-        if grep -q "\[autostart\]" "$WAYFIRE_FILE"; then
-            sed -i "/\[autostart\]/a icerobot_kiosk = /opt/icerobot/kiosk.sh" "$WAYFIRE_FILE"
-        else
-            echo -e "\n[autostart]\nicerobot_kiosk = /opt/icerobot/kiosk.sh" >> "$WAYFIRE_FILE"
-        fi
-    fi
-fi
-
-# 3. Configura no autostart do LXDE (se usar RPi 3B+ antigo)
-for dir in "LXDE-pi" "LXDE"; do
-    LXDE_DIR=~/.config/lxsession/$dir
-    mkdir -p "$LXDE_DIR"
-    if ! grep -q "kiosk.sh" "$LXDE_DIR/autostart" 2>/dev/null; then
-        echo "@/opt/icerobot/kiosk.sh" >> "$LXDE_DIR/autostart"
-    fi
-done
-
-# 4. Configura no Autostart Universal
-mkdir -p ~/.config/autostart
-cat > ~/.config/autostart/kiosk.desktop << EOL
-[Desktop Entry]
-Type=Application
-Name=Ice Robot Kiosk
-Exec=/opt/icerobot/kiosk.sh
-Terminal=false
-X-GNOME-Autostart-enabled=true
-EOL
-chmod +x ~/.config/autostart/kiosk.desktop
-
-
-
----
 
 ## ⚡ Instalação Rápida (One-Line Install)
 
