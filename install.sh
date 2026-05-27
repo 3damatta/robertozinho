@@ -258,7 +258,7 @@ else
     CHROME_BIN="chromium-browser"
 fi
 
-\$CHROME_BIN --kiosk --noerrdialogs --disable-infobars --no-first-run /opt/icerobot/script/wait-for-app-html/index.html &
+\$CHROME_BIN --kiosk --noerrdialogs --disable-infobars --no-first-run --password-store=basic --use-mock-keychain /opt/icerobot/script/wait-for-app-html/index.html &
 EOL
     chmod +x "$KIOSK_SCRIPT"
     chown $REAL_USER:$REAL_USER "$KIOSK_SCRIPT"
