@@ -105,16 +105,16 @@ pull_updates() {
 rebuild_project() {
     log_info "Reconstruindo o Frontend..."
     cd "$INSTALL_DIR/frontend"
-    npm install > /dev/null 2>&1
-    NODE_OPTIONS="--max-old-space-size=1024" npm run build > /dev/null 2>&1
+    npm install >> "$INSTALL_DIR/update.log" 2>&1
+    NODE_OPTIONS="--max-old-space-size=1024" npm run build >> "$INSTALL_DIR/update.log" 2>&1
     
     log_info "Reconstruindo o Backend..."
     cd "$INSTALL_DIR"
-    mvn clean install -DskipTests > /dev/null 2>&1
+    mvn clean install -DskipTests >> "$INSTALL_DIR/update.log" 2>&1
     
     log_info "Reiniciando os serviços no PM2..."
-    pm2 restart icerobot-app || pm2 start ecosystem.config.js
-    pm2 save
+    pm2 restart icerobot-app || pm2 start ecosystem.config.js >> "$INSTALL_DIR/update.log" 2>&1
+    pm2 save >> "$INSTALL_DIR/update.log" 2>&1
 }
 
 # --- Main ---
