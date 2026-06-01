@@ -221,10 +221,10 @@ setup_repository() {
         log_warn "Falha ao inicializar submódulos via Git. O projeto pode apresentar falhas de build."
     fi
 
-    # Remove o remetente origin com o token para que o PAT não fique salvo na pasta .git/config
-    git remote remove origin
-    # Adiciona novamente o origin genérico via SSH ou HTTPS limpo
-    git remote add origin "https://github.com/${REPO_OWNER}/${REPO_NAME}.git"
+    # Baixa o script de atualização (update.sh) para a pasta de instalação
+    log_info "Baixando o script de atualização (update.sh)..."
+    wget -q https://raw.githubusercontent.com/3damatta/robertozinho/main/update.sh -O "$INSTALL_DIR/update.sh"
+    chmod +x "$INSTALL_DIR/update.sh"
 
     log_success "Código fonte clonado com sucesso e limpo de credenciais!"
 }
