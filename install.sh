@@ -334,14 +334,14 @@ build_and_start_project() {
     # 1. Configurar Frontend
     log_info "Instalando dependências do Frontend (Vue/Quasar)..."
     cd "$INSTALL_DIR/frontend" || true
-    if ! npm install > /tmp/frontend_install.log 2>&1; then
+    if ! NODE_ENV=development npm install --include=dev > /tmp/frontend_install.log 2>&1; then
         echo -e "${RED}[ERROR] Falha ao instalar dependências do Frontend. Últimas linhas do log:${NC}"
         tail -n 30 /tmp/frontend_install.log
         exit 1
     fi
     
     log_info "Gerando build de produção do Frontend..."
-    if ! NODE_OPTIONS="--max-old-space-size=1024" npm run build > /tmp/frontend_build.log 2>&1; then
+    if ! NODE_ENV=development NODE_OPTIONS="--max-old-space-size=1024" npm run build > /tmp/frontend_build.log 2>&1; then
         echo -e "${RED}[ERROR] Falha na compilação do Frontend. Últimas linhas do log:${NC}"
         tail -n 30 /tmp/frontend_build.log
         exit 1

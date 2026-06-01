@@ -105,8 +105,8 @@ pull_updates() {
 rebuild_project() {
     log_info "Reconstruindo o Frontend..."
     cd "$INSTALL_DIR/frontend"
-    npm install >> "$INSTALL_DIR/update.log" 2>&1
-    NODE_OPTIONS="--max-old-space-size=1024" npm run build >> "$INSTALL_DIR/update.log" 2>&1
+    NODE_ENV=development npm install --include=dev >> "$INSTALL_DIR/update.log" 2>&1
+    NODE_ENV=development NODE_OPTIONS="--max-old-space-size=1024" npm run build >> "$INSTALL_DIR/update.log" 2>&1
     
     log_info "Reconstruindo o Backend..."
     cd "$INSTALL_DIR"
